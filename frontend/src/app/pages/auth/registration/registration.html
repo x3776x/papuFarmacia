@@ -1,0 +1,67 @@
+<header class="flex flex-col items-center justify-center gap-4 mb-5">
+  <h1>Pharmacy system</h1>
+  <h2>Registro de usuario</h2>
+</header>
+
+<form
+  [formGroup]="registrationForm"
+  (ngSubmit)="onSubmit()"
+  class="flex flex-col p-6 mx-7 mb-7 border border-gray-300 rounded-lg shadow-lg bg-white"
+>
+  <main class="flex flex-col gap-8 md:flex-row p-0">
+    <section class="flex flex-col items-center justify-center w-full md:w-1/2 bg-white">
+      <div class="w-full max-w-sm">
+        <input-field
+          label="Nombre(s)"
+          type="text"
+          placeholder="Ingrese su(s) nombre(s)"
+          formControlName="name"
+          autoComplete="name"
+        ></input-field>
+
+        <input-field
+          label="Apellidos"
+          type="text"
+          placeholder="Ingrese sus apellidos"
+          formControlName="surnames"
+          autoComplete="name"
+        ></input-field>
+
+        <input-field
+          label="Fecha de nacimiento"
+          type="date"
+          formControlName="dateBirth"
+          autoComplete="bday-day"
+        ></input-field>
+      </div>
+    </section>
+    <section class="flex flex-col items-center justify-center w-full md:w-1/2 bg-white">
+      <div class="w-full max-w-sm">
+        <input-field
+          label="Correo electrónico"
+          type="email"
+          placeholder="Ingrese su correo electrónico"
+          formControlName="email"
+          autoComplete="email"
+        ></input-field>
+
+        <input-field
+          label="Contraseña"
+          type="password"
+          placeholder="Ingrese su contraseña"
+          formControlName="password"
+          autoComplete="new-password"
+        ></input-field>
+
+        <input-field
+          label="Confirme contraseña"
+          type="password"
+          placeholder="Confirme su contraseña"
+          formControlName="confirmPassword"
+          autoComplete="new-password"
+        ></input-field>
+      </div>
+    </section>
+  </main>
+  <cancel-accept></cancel-accept>
+</form>

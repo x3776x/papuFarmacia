@@ -1,0 +1,41 @@
+<nav
+  [ngClass]="getNavbarClass()"
+  class="shadow-xl p-2 text-white flex align-middle justify-between display-grid width-[100dvh]"
+>
+  <img
+    src="https://placehold.co/120x40/FFFFFF/000000/png?text=Logo"
+    alt="Logo"
+    type="png"
+    class="border border-white rounded-lg h-10 w-30"
+  />
+  <ul class="flex mx-auto align-middle">
+    <li class="align-middle my-auto mx-auto">
+      <a
+        routerLink="/inicio"
+        class="font-bold text-xl p-2 mx-2 rounded-2xl align-middle transition duration-300 ease-in-out hover:underline hover:bg-blue-500 cursor-pointer"
+        >Inicio</a
+      >
+      <a
+        routerLink="/infantil"
+        class="font-bold text-xl p-2 mx-2 transition duration-300 ease-in-out hover:underline hover:bg-rose-300 rounded-2xl align-middle"
+        >Infantil</a
+      >
+      <a
+        routerLink="/suplementos"
+        class="font-bold text-xl p-2 mx-2 transition duration-300 ease-in-out hover:underline hover:bg-red-600 rounded-2xl align-middle"
+        >Suplementos</a
+      >
+      <a
+        routerLink="/vitaminas-minerales"
+        class="font-bold text-xl p-2 mx-2 transition duration-300 ease-in-out hover:underline hover:bg-purple-700 rounded-2xl align-middle"
+        >Vitaminas y minerales</a
+      >
+      <a
+        routerLink="/adultos-mayores"
+        class="font-bold text-xl p-2 mx-2 transition duration-300 ease-in-out hover:underline hover:bg-amber-600 rounded-2xl align-middle"
+        >Adultos mayores</a
+      >
+    </li>
+  </ul>
+  <search-box class="my-auto"></search-box>
+</nav>

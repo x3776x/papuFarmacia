@@ -1,0 +1,13 @@
+<header class="justify-self-start m-3">
+  <h1>Resultados para: "{{ searchQuery }}"</h1>
+
+  <div class="container text-center">
+    @if (results.length > 0) { @for (item of results; track item.id) {
+    <div class="border p-2 rounded">
+      {{ item.name }}
+    </div>
+    } } @else {
+    <div class="mt-4 text-gray-500">No se encontraron resultados.</div>
+    }
+  </div>
+</header>
