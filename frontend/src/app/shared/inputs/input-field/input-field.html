@@ -1,0 +1,14 @@
+<div class="flex flex-col gap-1 my-2 w-full">
+  <label class="label-form">{{ label }}</label>
+
+  <input
+    [type]="type"
+    [placeholder]="placeholder"
+    [disabled]="disabled"
+    [value]="value ?? ''"
+    (input)="onInput($event.target.value)"
+    (blur)="onBlur()"
+    [autocomplete]="autoComplete"
+    class="rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
+  />
+</div>

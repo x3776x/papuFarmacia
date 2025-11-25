@@ -1,0 +1,14 @@
+<div class="flex flex-col md:flex-row gap-4 my-3 mx-auto justify-end">
+  <button
+    type="button"
+    [textContent]="buttonCancelText"
+    (click)="onClickCancel()"
+    class="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition duration-300"
+  ></button>
+  <button
+    type="submit"
+    [textContent]="buttonAcceptText"
+    (click)="onClickAccept()"
+    class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
+  ></button>
+</div>

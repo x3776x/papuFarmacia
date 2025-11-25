@@ -1,0 +1,62 @@
+<main class="flex flex-col md:flex-row p-0">
+  <!-- Imagen del lado izquierdo (oculta en pantallas pequeñas) -->
+  <div
+    class="hidden md:flex md:w-1/2 bg-cover bg-center bg-no-repeat"
+    style="background-image: url('https://placehold.co/600x400?text=Pharmacy+Image')"
+  ></div>
+
+  <!-- Login del lado derecho (ocupa toda la pantalla en móviles) -->
+  <div class="flex flex-col items-center justify-center w-full md:w-1/2 p-8 bg-white">
+    <section class="mb-4">
+      <img
+        src="https://placehold.co/120x40/000000/FFFFFF/png?text=Logo"
+        alt="Logo"
+        class="h-full w-full object-cover"
+      />
+    </section>
+    <header class="flex flex-col items-center justify-center gap-4 mb-5">
+      <h1>Pharmacy system</h1>
+      <h2>Inicio de sesión</h2>
+    </header>
+    <section class="w-full max-w-sm">
+      <form
+        [formGroup]="loginForm"
+        (ngSubmit)="onSubmit()"
+        class="flex flex-col gap-4 p-6 border border-gray-300 rounded-lg shadow-lg bg-white"
+      >
+        <div>
+          <input-field
+            label="Correo electrónico o Usuario:"
+            type="text"
+            placeholder="example@example.com / User123"
+            formControlName="user"
+            autoComplete="username"
+          ></input-field>
+          @if(loginForm.get("user")?.touched && loginForm.get("user")?.invalid){
+          <p class="label-form-error">Ingrese correo o nombre de usuario.</p>
+          }
+        </div>
+
+        <div>
+          <input-field
+            label="Contraseña:"
+            type="text"
+            placeholder="Ingrese su correo electrónico"
+            formControlName="password"
+            autoComplete="currentPassword"
+          ></input-field>
+          @if(loginForm.get("password")?.touched && loginForm.get("password")?.invalid){
+          <p class="label-form-error">La contraseña es requerida.</p>
+          }
+        </div>
+
+        <button
+          type="submit"
+          class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
+        >
+          Iniciar sesión
+        </button>
+      </form>
+    </section>
+  </div>
+</main>

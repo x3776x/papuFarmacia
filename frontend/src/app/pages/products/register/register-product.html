@@ -1,0 +1,178 @@
+<form [formGroup]="medicineForm" (ngSubmit)="onSubmit()" class="flex flex-col p-6 mx-7 mb-0">
+  <h1 class="m-4">Registro de producto</h1>
+  <!-- Split form into 2 columns -->
+  <main class="flex flex-col gap-8 md:flex-row p-0">
+    <section class="flex flex-col items-center justify-start w-full md:w-1/2">
+      <div class="w-full max-w-sm">
+        <h2>Datos del producto</h2>
+        <div>
+          <!-- ProductType -->
+          <label for="productType" class="label-form">Selecciona el tipo de producto:</label>
+          <select
+            id="productType"
+            name="optionsProductType"
+            formControlName="idProductType"
+            class="rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400 w-full"
+          >
+            <option value="">--Elige una opción--</option>
+            <option value="opcion1">Medicamento</option>
+            <option value="opcion2">Vitaminas y suplementos</option>
+            <option value="opcion3">Cuidado personal</option>
+            <option value="opcion4">Belleza y dermocosmética</option>
+            <option value="opcion5">Bebés y maternidad</option>
+            <option value="opcion6">Higiene y salud sexual</option>
+            <option value="opcion7">Primeros auxilios</option>
+            <option value="opcion8">Equipo médico</option>
+            <option value="opcion9">Alimentos y bebidas</option>
+          </select>
+          @if (medicineForm.get('idProductType')?.touched &&
+          medicineForm.get('idProductType')?.invalid) {
+          <p class="label-form-error">Debes elegir un tipo de producto.</p>
+          }
+        </div>
+
+        <!-- ChemicalName -->
+        <div>
+          <input-field
+            label="Nombre químico del producto:"
+            type="text"
+            placeholder="Ácido acetilsalicílico 100mg"
+            formControlName="chemicalName"
+          ></input-field>
+          @if (medicineForm.get("chemicalName")?.touched &&
+          medicineForm.get('chemicalName')?.invalid) {
+          <p class="label-form-error">El nombre es obligatorio (mínimo 3 caracteres).</p>
+          }
+        </div>
+
+        <!-- ComercialName -->
+        <div>
+          <input-field
+            label="Nombre comercial del producto:"
+            type="text"
+            placeholder="Aspirina"
+            formControlName="comercialName"
+          ></input-field>
+          @if (medicineForm.get("comercialName")?.touched &&
+          medicineForm.get('comercialName')?.invalid) {
+          <p class="label-form-error">El nombre es obligatorio (mínimo 3 caracteres).</p>
+          }
+        </div>
+
+        <!-- ImageUploader -->
+        <div>
+          <image-uploader label="Foto del producto" formControlName="imageProduct"></image-uploader>
+          @if (medicineForm.get("imageProduct")?.touched &&
+          medicineForm.get('imageProduct')?.invalid) {
+          <p class="label-form-error">La foto del producto es requerida.</p>
+          }
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="label-form">Descripción:</label>
+          <textarea
+            formControlName="description"
+            rows="3"
+            placeholder="Usos, precauciones, etc."
+            formControlName="description"
+            class="w-full border rounded-lg border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
+          >
+          </textarea>
+          @if (medicineForm.get("description")?.touched && medicineForm.get('description')?.invalid)
+          {
+          <p class="label-form-error">La descripción es requerida.</p>
+          }
+        </div>
+      </div>
+    </section>
+    <section class="flex flex-col items-center justify-start w-full md:w-1/2">
+      <div class="w-full max-w-sm">
+        <h2>Datos de venta</h2>
+        <!-- Precio -->
+        <div>
+          <input-field
+            label="Precio:"
+            type="number"
+            placeholder="150.00"
+            formControlName="price"
+          ></input-field>
+          @if (medicineForm.get('price')?.touched && medicineForm.get('price')?.invalid) {
+          <p class="label-form-error">El precio es obligatorio.</p>
+          }
+        </div>
+
+        <!-- Expiration -->
+        <div>
+          <input-field
+            label="Fecha de caducidad:"
+            type="date"
+            placeholder="dd/mm/aaaa"
+            formControlName="expirationDate"
+          ></input-field>
+          @if (medicineForm.get('expirationDate')?.touched &&
+          medicineForm.get('expirationDate')?.invalid) {
+          <p class="label-form-error">La fecha de caducidad es obligatoria.</p>
+          }
+        </div>
+
+        <!-- Stock -->
+        <div>
+          <input-field
+            label="Stock disponible:"
+            type="number"
+            placeholder="50"
+            formControlName="stockAvailable"
+          ></input-field>
+          @if (medicineForm.get('stockAvailable')?.touched &&
+          medicineForm.get('stockAvailable')?.invalid) {
+          <p class="label-form-error">Ingrese un stock válido.</p>
+          }
+        </div>
+
+        <!-- Lote -->
+        <div>
+          <input-field
+            label="Lote"
+            type="text"
+            placeholder="2F342S"
+            formControlName="batch"
+          ></input-field>
+          @if (medicineForm.get('batch')?.touched && medicineForm.get('batch')?.invalid) {
+          <p class="label-form-error">Ingrese un lote válido.</p>
+          }
+        </div>
+
+        <!-- Supplier -->
+        <div>
+          <input-field
+            label="Proveedor"
+            type="text"
+            placeholder="Farmacéutica XYZ"
+            formControlName="supplier"
+            autoComplete="organization"
+          ></input-field>
+          @if (medicineForm.get('supplier')?.touched && medicineForm.get('supplier')?.invalid) {
+          <p class="label-form-error">El proveedor es obligatorio.</p>
+          }
+        </div>
+
+        <!-- Pharmaceutical -->
+        <div>
+          <input-field
+            label="Farmacéutica"
+            type="text"
+            placeholder="Farmacéutica XYZ"
+            formControlName="pharmaceutical"
+            autoComplete="organization"
+          ></input-field>
+          @if (medicineForm.get('pharmaceutical')?.touched &&
+          medicineForm.get('pharmaceutical')?.invalid) {
+          <p class="label-form-error">La farmacéutica es obligatorio.</p>
+          }
+        </div>
+      </div>
+    </section>
+  </main>
+  <cancel-accept></cancel-accept>
+</form>
