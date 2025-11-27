@@ -16,7 +16,6 @@ app.add_middleware(
     allow_origins=[
         # "http://localhost:4200",
         "*"
-        # añade otras orígenes si las necesitas
     ],           # no usar "*" si usas Authorization + credentials
     allow_credentials=False,
     #allow_methods=["GET","POST","PUT","DELETE","OPTIONS","PATCH"],
