@@ -30,14 +30,15 @@ export class ServiceAuth {
   }
 
   login(identifier: string, password: string): Observable<any> {
-    return this.httpClient.post<any>(`${this.baseUrl}/login`, { identifier, password }).pipe(
-      tap((res: any) => {
-        if (res?.token) {
-          localStorage.setItem('auth_token', res.token);
-        }
-      }),
-      catchError(this.config.handleError)
-    );
+    return this.httpClient
+      .post<any>(`${this.baseUrl}/login`, { identifier, password }, { observe: 'response' })
+      .pipe(
+        tap((res: any) => {
+          if (res?.token) {
+            localStorage.setItem('auth_token', res.token);
+          }
+        })
+      );
   }
 
   logout() {
