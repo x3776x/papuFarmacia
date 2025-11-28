@@ -1,23 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, Observable, tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { ServicesConfig } from '../config';
 import { environment } from '../../../environments/environment.development';
-
-export interface UserTemplate {
-  id?: number;
-  fullName?: string;
-  username?: string;
-  email?: string;
-  password?: string;
-  isActive?: boolean;
-  idRole?: number;
-}
-
-export interface LoginTemplate {
-  identifier: string;
-  password: string;
-}
+import { InterfaceLogin } from '../../interfaces/user/login';
+import { InterfaceNewUser } from '../../interfaces/user/new-user';
 
 @Injectable({
   providedIn: 'root',
@@ -29,16 +16,14 @@ export class ServiceAuth {
     this.baseUrl = environment.authService;
   }
 
-  login(identifier: string, password: string): Observable<any> {
-    return this.httpClient
-      .post<any>(`${this.baseUrl}/login`, { identifier, password }, { observe: 'response' })
-      .pipe(
-        tap((res: any) => {
-          if (res?.token) {
-            localStorage.setItem('auth_token', res.token);
-          }
-        })
-      );
+  login(data: InterfaceLogin): Observable<any> {
+    return this.httpClient.post<any>(`${this.baseUrl}/login`, data, { observe: 'response' }).pipe(
+      tap((res: any) => {
+        if (res?.token) {
+          localStorage.setItem('auth_token', res.token);
+        }
+      })
+    );
   }
 
   logout() {
@@ -53,12 +38,12 @@ export class ServiceAuth {
     return !!localStorage.getItem('auth_token');
   }
 
-  postUser(user: UserTemplate) {
-    return this.httpClient.post<UserTemplate>(`${this.baseUrl}/register`, user);
+  // TODO Check if this is correct and what response are
+  verifyToken(tokenJWT: string) {
+    return this.httpClient.get(`${this.baseUrl}/verify-token`);
   }
 
-  // TODO Check if this is correct and what response are
-  verifyToken() {
-    return this.httpClient.get(`${this.baseUrl}/verify-token`);
+  postUser(user: InterfaceNewUser) {
+    return this.httpClient.post<InterfaceNewUser>(`${this.baseUrl}/register`, user);
   }
 }

@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import { ComponentInputField } from '../../../shared/inputs/input-field/input-field';
 import { ServiceAuth } from '../../../services/auth/auth';
-import { DialogData, DialogError } from '../../../shared/dialogs/error/dialog-error';
+import { ServiceDialog } from '../../../shared/dialogs/service-dialog';
+import { InterfaceLogin } from '../../../interfaces/user/login';
 
 @Component({
   selector: 'login',
@@ -21,7 +21,7 @@ export class PageLogin implements OnInit {
   constructor(
     private fb: FormBuilder,
     private serviceAuth: ServiceAuth,
-    private matDialog: MatDialog
+    private dialogService: ServiceDialog
   ) {
     this.loginForm = this.fb.group({
       identifier: ['', [Validators.required, Validators.minLength(5)]],
@@ -37,13 +37,13 @@ export class PageLogin implements OnInit {
       return;
     }
 
-    const { identifier, password } = this.loginForm.value;
+    const data: InterfaceLogin = this.loginForm.value;
 
-    this.serviceAuth.login(identifier, password).subscribe({
+    this.serviceAuth.login(data).subscribe({
       next: (response: HttpResponse<any>) => {
         this.token = response.body;
-        console.log('Código de estado:', response.status);
-        console.log('Token recibido:', response.body);
+        console.log('Código de estado:', response.status, '\nToken recibido:', response.body);
+        this.dialogService.success('Credenciales correctas', 'Bienvenid@.');
       },
       error: (err: HttpErrorResponse) => {
         console.error(
@@ -54,35 +54,13 @@ export class PageLogin implements OnInit {
           '\nMensaje:',
           err.message
         );
-        if (err.status === 401) {
-          this.openCustomDialog();
+        if (err.status === 401 || err.status === 422) {
+          this.dialogService.error('Credenciales incorrectas', 'Intente de nuevo.');
         } else if (err.status === 500) {
-          window.alert('Error del servidor');
+          this.dialogService.error('Error interno del servidor', 'Intente de nuevo.');
         }
       },
-      complete: () => {
-        console.log('Petición de login completada');
-      },
-    });
-  }
-
-  openCustomDialog() {
-    const data: DialogData = {
-      title: 'Credenciales incorrectas',
-      message: 'Usuario o contraseña incorrectos',
-      showInput: false,
-      inputValue: '',
-      confirmText: 'Enviar',
-      cancelText: 'Cancelar',
-    };
-
-    const dialogRef = this.matDialog.open(DialogError, {
-      width: '400px',
-      data,
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log('Resultado del diálogo:', result);
+      complete: () => {},
     });
   }
 }

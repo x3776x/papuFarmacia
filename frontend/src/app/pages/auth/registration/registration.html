@@ -1,18 +1,16 @@
-<header class="flex flex-col items-center justify-center gap-4 mb-5">
-  <h1>Pharmacy system</h1>
-  <h2>Registro de usuario</h2>
-</header>
+<h1 class="flex flex-col items-center justify-center gap-4 my-5">Pharmacy system</h1>
 
 <form
   [formGroup]="registrationForm"
   (ngSubmit)="onSubmit()"
   class="flex flex-col p-6 mx-7 mb-7 border border-gray-300 rounded-lg shadow-lg bg-white"
 >
+  <h2 class="flex flex-col mb-2">Registro de usuario</h2>
   <main class="flex flex-col gap-8 md:flex-row p-0">
     <section class="flex flex-col items-center justify-center w-full md:w-1/2 bg-white">
       <div class="w-full max-w-sm">
         <app-input-field
-          label="Nombre(s)"
+          label="Nombre(s):"
           type="text"
           placeholder="Ingrese su(s) nombre(s)"
           formControlName="name"
@@ -20,7 +18,7 @@
         ></app-input-field>
 
         <app-input-field
-          label="Apellidos"
+          label="Apellidos:"
           type="text"
           placeholder="Ingrese sus apellidos"
           formControlName="surnames"
@@ -28,17 +26,18 @@
         ></app-input-field>
 
         <app-input-field
-          label="Fecha de nacimiento"
-          type="date"
-          formControlName="dateBirth"
-          autoComplete="bday-day"
+          label="Username:"
+          type="text"
+          placeholder="Usuario123"
+          formControlName="username"
+          autoComplete="username"
         ></app-input-field>
       </div>
     </section>
     <section class="flex flex-col items-center justify-center w-full md:w-1/2 bg-white">
       <div class="w-full max-w-sm">
         <app-input-field
-          label="Correo electrónico"
+          label="Correo electrónico:"
           type="email"
           placeholder="Ingrese su correo electrónico"
           formControlName="email"
@@ -46,7 +45,7 @@
         ></app-input-field>
 
         <app-input-field
-          label="Contraseña"
+          label="Contraseña:"
           type="password"
           placeholder="Ingrese su contraseña"
           formControlName="password"
@@ -54,7 +53,7 @@
         ></app-input-field>
 
         <app-input-field
-          label="Confirme contraseña"
+          label="Confirme contraseña:"
           type="password"
           placeholder="Confirme su contraseña"
           formControlName="confirmPassword"
@@ -63,5 +62,8 @@
       </div>
     </section>
   </main>
-  <app-cancel-accept-buttons></app-cancel-accept-buttons>
+  <app-cancel-accept-buttons
+    (cancel)="onCancel()"
+    (accept)="onSubmit()"
+  ></app-cancel-accept-buttons>
 </form>
