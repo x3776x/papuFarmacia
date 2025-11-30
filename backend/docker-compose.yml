@@ -1,119 +1,223 @@
 name: papufarmacia
-#backend/docker-compose up --build -d after any modifications
+
 services:
-  #auth postgresDB
-  pharma_auth_db:
+  # --------------------------------------------------------------------------------------
+  # AUTH DATABASE (POSTGRES)
+  # --------------------------------------------------------------------------------------
+  auth_db_postgres:
     image: postgres:15-alpine
-    container_name: pharma_auth_db
+    container_name: auth_db_postgres
     env_file:
       - .env
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-    ports:
-      - "5432:5432"
-    volumes: 
-      - postgres_data:/var/lib/postgresql/data
+      POSTGRES_USER: ${POSTGRES_AUTH_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_AUTH_DB}
+      POSTGRES_HOST: ${POSTGRES_AUTH_HOST}
+    expose:
+      - "5432"
+    volumes:
+      - auth_vol_postgres:/var/lib/postgresql/data
     networks:
-      - papufarmacia_network
-    healthcheck: 
-      test: ["CMD-SHELL", "pg_isready -h ${POSTGRES_HOST} -U ${POSTGRES_USER}"]
-      interval: 5s
+      - internal_network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_AUTH_USER} -d ${POSTGRES_AUTH_DB}",
+        ]
+      interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
 
-#authentication service
+  # --------------------------------------------------------------------------------------
+  # AUTH SERVICE
+  # --------------------------------------------------------------------------------------
   auth_service:
     build: ./auth-service
-    container_name: pharma_auth_service
+    container_name: auth_service
     env_file:
       - .env
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}
-      - SECRET_KEY=${SECRET_KEY}
-      - USER_SERVICE_URL=${USER_URL}
-    ports:
-      - "8081:8081"
+      DATABASE_URL: postgresql://${POSTGRES_AUTH_USER}:${POSTGRES_AUTH_PASSWORD}@${POSTGRES_AUTH_HOST}:${POSTGRES_AUTH_PORT}/${POSTGRES_AUTH_DB}
+      SECRET_KEY: ${SECRET_KEY}
+    expose:
+      - "8080"
     command: >
       sh -c "
-        until pg_isready -h ${POSTGRES_HOST} -U ${POSTGRES_USER} -d ${POSTGRES_DB}; do
+        until pg_isready -h ${POSTGRES_AUTH_HOST} -U ${POSTGRES_AUTH_USER} -d ${POSTGRES_AUTH_DB}; do
           echo 'Esperando a PostgreSQL...';
           sleep 2;
         done;
-        echo 'Base de datos lista. Ejecutando migraciones...';
         alembic upgrade head;
-        echo 'Migraciones completadas. Seed roles...';
         python /app/seed_data.py;
-        echo 'Seed complete. Iniciando servidor...';
-        uvicorn app.main:app --host 0.0.0.0 --port 8081"
+        uvicorn app.main:app --host 0.0.0.0 --port 8080"
     depends_on:
-      - pharma_auth_db
-      - user_service
-    networks:
-      - papufarmacia_network
-    healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8081/health')"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
-# user MongoDB
-  pharma_user_db:
-    image: mongo:6-jammy
-    container_name: pharma_user_db
-    env_file:
-      - .env
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-      - MONGO_INITDB_DATABASE=${MONGO_USER_DB}
-    ports:
-      - "27018:27017"
-    volumes: 
-      - mongo_user_data:/data/db
-    networks:
-      - papufarmacia_network
-    healthcheck:
-      test: mongosh --username ${MONGO_INITDB_ROOT_USERNAME} --password ${MONGO_INITDB_ROOT_PASSWORD} --eval "db.adminCommand('ping')"
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
-  #user service
-  user_service:
-    build: ./user-service
-    container_name: pharma_user_service
-    env_file:
-      - .env
-    environment:
-      - DATABASE_URL=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@pharma_user_db:27017/${MONGO_USER_DB}?authSource=admin
-    ports:
-      - "8082:8082"
-    command: "uvicorn app.main:app --host 0.0.0.0 --port 8082"
-    depends_on:
-      pharma_user_db:
+      # TODO Fix
+      # user_service:
+      # condition: service_healthy
+      auth_db_postgres:
         condition: service_healthy
     networks:
-      - papufarmacia_network
+      - internal_network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python - << 'EOF'\nimport requests\nprint(requests.get('http://auth_service:8080/health').status_code)\nEOF",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
-  #API Gateway
+  # --------------------------------------------------------------------------------------
+  # USER DATABASE (MONGO)
+  # --------------------------------------------------------------------------------------
+  user_db_mongo:
+    image: mongo:6.0
+    container_name: user_db_mongo
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_USER_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_USER_DB}
+      MONGO_INITDB_HOST: ${MONGO_USER_HOST}
+    expose:
+      - "27017"
+    volumes:
+      - user_vol_mongo:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'mongosh --username ${MONGO_USER_INITDB_ROOT_USERNAME} --password ${MONGO_USER_INITDB_ROOT_PASSWORD} --eval "db.adminCommand(''ping'')"',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - internal_network
+
+  # --------------------------------------------------------------------------------------
+  # USER SERVICE
+  # --------------------------------------------------------------------------------------
+  user_service:
+    build: ./user-service
+    container_name: user_service
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: mongodb://${MONGO_USER_INITDB_ROOT_USERNAME}:${MONGO_USER_INITDB_ROOT_PASSWORD}@${MONGO_USER_HOST}:${MONGO_USER_PORT}/${MONGO_USER_DB}?authSource=admin
+    expose:
+      - "8080"
+    command: >
+      sh -c "uvicorn app.main:app --host 0.0.0.0 --port 8080"
+    depends_on:
+      user_db_mongo:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python - << 'EOF'\nimport requests\nprint(requests.get('http://user_service:8080/health').status_code)\nEOF",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - internal_network
+
+  # --------------------------------------------------------------------------------------
+  # PRODUCT DATABASE (POSTGRES)
+  # --------------------------------------------------------------------------------------
+  product_db_postgres:
+    image: postgres:15
+    container_name: product_db_postgres
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_PRODUCT_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PRODUCT_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_PRODUCT_DB}
+      POSTGRES_HOST: ${POSTGRES_PRODUCT_HOST}
+    expose:
+      - "5432"
+    volumes:
+      - product_vol_postgres:/var/lib/postgresql/data
+    networks:
+      - internal_network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -h ${POSTGRES_PRODUCT_HOST} -U ${POSTGRES_PRODUCT_USER}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # --------------------------------------------------------------------------------------
+  # PRODUCT SERVICE
+  # --------------------------------------------------------------------------------------
+  product_service:
+    build: ./product-service
+    container_name: product_service
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_PRODUCT_USER}:${POSTGRES_PRODUCT_PASSWORD}@${POSTGRES_PRODUCT_HOST}:${POSTGRES_PRODUCT_PORT}/${POSTGRES_PRODUCT_DB}
+      SECRET_KEY: ${SECRET_KEY}
+    expose:
+      - "8080"
+    command: >
+      sh -c "uvicorn app.main:app --host 0.0.0.0 --port 8080"
+    depends_on:
+      product_db_postgres:
+        condition: service_healthy
+    networks:
+      - internal_network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python - << 'EOF'\nimport requests\nprint(requests.get('http://product_service:8080/health').status_code)\nEOF",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # --------------------------------------------------------------------------------------
+  # API GATEWAY
+  # --------------------------------------------------------------------------------------
   api_gateway:
     build: ./API-Gateway
-    container_name: papufarmacia_gateway
+    container_name: api_gateway
     ports:
-      - "8080:80"
+      - "8080:8080"
     depends_on:
       - auth_service
-      - user_service
+      # - user_service
+      - product_service
     networks:
-      - papufarmacia_network
+      - internal_network
+      - external_network
 
+# --------------------------------------------------------------------------------------
+# VOLUMES
+# --------------------------------------------------------------------------------------
 volumes:
-  postgres_data:
-  mongo_user_data:
+  auth_vol_postgres:
+  user_vol_mongo:
+  product_vol_postgres:
 
-networks: 
-  papufarmacia_network:
+# --------------------------------------------------------------------------------------
+# NETWORKS
+# --------------------------------------------------------------------------------------
+networks:
+  internal_network:
+    driver: bridge
+    internal: true
+  external_network:
     driver: bridge
