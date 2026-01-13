@@ -7,6 +7,7 @@ import { InterfaceLogin } from '../../interfaces/user/login';
 import { InterfacePostUser } from '../../interfaces/user/post-user';
 import { InterfaceLoginResponse } from '../../interfaces/user/login-response';
 import { InterfaceTokenVerified } from '../../interfaces/user/token-verified';
+import { InterfaceUserWithProfilePicture } from '../../interfaces/user/user-photo';
 
 @Injectable({
   providedIn: 'root',
@@ -49,5 +50,12 @@ export class ServiceAuth {
 
   postUser(userData: InterfacePostUser): Observable<any> {
     return this.httpClient.post<any>(`${this.authServiceURL}/register`, userData);
+  }
+
+  getData() {
+    const headers = { Authorization: 'Bearer token' };
+    return this.httpClient.get<InterfaceUserWithProfilePicture>(`${this.authServiceURL}/me`, {
+      headers,
+    });
   }
 }
