@@ -3,41 +3,32 @@ import { Injectable } from '@angular/core';
 import { catchError, Observable, tap } from 'rxjs';
 import { ServicesConfig } from '../config';
 import { environment } from '../../../environments/environment.development';
-
-export interface UserTemplate {
-  id?: number;
-  fullName?: string;
-  username?: string;
-  email?: string;
-  password?: string;
-  isActive?: boolean;
-  idRole?: number;
-}
-
-export interface LoginTemplate {
-  identifier: string;
-  password: string;
-}
+import { InterfaceLogin } from '../../interfaces/user/login';
+import { InterfacePostUser } from '../../interfaces/user/post-user';
+import { InterfaceLoginResponse } from '../../interfaces/user/login-response';
+import { InterfaceTokenVerified } from '../../interfaces/user/token-verified';
+import { InterfaceUserWithProfilePicture } from '../../interfaces/user/user-photo';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ServiceAuth {
-  private baseUrl: string = '';
+  private authServiceURL: string = '';
 
   constructor(private httpClient: HttpClient, private config: ServicesConfig) {
-    this.baseUrl = environment.authService;
+    this.authServiceURL = environment.authService;
   }
 
-  login(identifier: string, password: string): Observable<any> {
-    return this.httpClient.post<any>(`${this.baseUrl}/login`, { identifier, password }).pipe(
-      tap((res: any) => {
-        if (res?.token) {
-          localStorage.setItem('auth_token', res.token);
-        }
-      }),
-      catchError(this.config.handleError)
-    );
+  login(loginData: InterfaceLogin): Observable<InterfaceLoginResponse> {
+    return this.httpClient
+      .post<InterfaceLoginResponse>(`${this.authServiceURL}/login`, loginData)
+      .pipe(
+        tap((res: InterfaceLoginResponse) => {
+          if (res?.access_token) {
+            localStorage.setItem('auth_token', res.access_token);
+          }
+        })
+      );
   }
 
   logout() {
@@ -52,12 +43,19 @@ export class ServiceAuth {
     return !!localStorage.getItem('auth_token');
   }
 
-  postUser(user: UserTemplate) {
-    return this.httpClient.post<UserTemplate>(`${this.baseUrl}/register`, user);
+  // TODO Check if this is correct and what response are
+  verifyToken(tokenJWT: string): Observable<InterfaceTokenVerified> {
+    return this.httpClient.get<InterfaceTokenVerified>(`${this.authServiceURL}/verify-token`);
   }
 
-  // TODO Check if this is correct and what response are
-  verifyToken() {
-    return this.httpClient.get(`${this.baseUrl}/verify-token`);
+  postUser(userData: InterfacePostUser): Observable<any> {
+    return this.httpClient.post<any>(`${this.authServiceURL}/register`, userData);
+  }
+
+  getData() {
+    const headers = { Authorization: 'Bearer token' };
+    return this.httpClient.get<InterfaceUserWithProfilePicture>(`${this.authServiceURL}/me`, {
+      headers,
+    });
   }
 }

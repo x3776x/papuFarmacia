@@ -26,3 +26,13 @@ class SaleItemInDBBase(SaleItemBase):
 
 class SaleItem(SaleItemInDBBase):
     pass
+<<<<<<< HEAD
+=======
+
+class SaleItemRead(SaleItemBase):
+    id: int 
+    sale_id: int
+
+    class Config:
+        orm_mode = True
+>>>>>>> Rodolfo

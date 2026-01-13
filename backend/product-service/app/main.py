@@ -19,6 +19,7 @@ app = FastAPI(
     root_path="/api/products"
 )
 
+<<<<<<< HEAD
 app.add_middleware(
     CORSMiddleware,
     # TODO Cors
@@ -28,4 +29,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+=======
+>>>>>>> Rodolfo
 app.include_router(router)
