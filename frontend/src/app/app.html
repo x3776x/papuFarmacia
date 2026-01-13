@@ -1,0 +1,11 @@
+@if (!isLoginRoute) {
+<app-navbar class="sticky top-0"></app-navbar>
+}
+
+<main class="py-auto px-auto mx-35 my-4 shadow-2xl">
+  <router-outlet></router-outlet>
+</main>
+
+@if (!isLoginRoute) {
+<app-footer></app-footer>
+}
