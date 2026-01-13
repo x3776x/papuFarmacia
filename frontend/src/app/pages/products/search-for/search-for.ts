@@ -1,6 +1,7 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { ServiceProduct } from '../../../services/product/product';
 import { ComponentCard1Product } from '../../../shared/cards/product-card-1/card';
 import { ProductList } from '../../../interfaces/product/products';
@@ -11,26 +12,32 @@ import { ProductList } from '../../../interfaces/product/products';
   imports: [CommonModule, ComponentCard1Product],
   templateUrl: './search-for.html',
 })
-export class PageSearchForProducts implements OnInit {
+export class PageSearchForProducts implements OnInit, OnDestroy {
   searchQuery: string = '';
   products: ProductList = [];
   loading: boolean = false;
   error: string = '';
 
+  private destroy$ = new Subject<void>();
+
   constructor(
     private route: ActivatedRoute,
     private productService: ServiceProduct,
-    private changeDetectorRef: ChangeDetectorRef
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     // Escucha cambios en el parámetro de ruta
-    this.route.params.subscribe((params) => {
-      this.searchQuery = params['query'];
-      if (this.searchQuery) {
-        this.searchProducts();
-      }
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      // Si no hay query en la URL, será undefined
+      this.searchQuery = params['query'] || '';
+      this.searchProducts();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   searchProducts(): void {
@@ -38,28 +45,44 @@ export class PageSearchForProducts implements OnInit {
     this.error = '';
     this.products = [];
 
-    // Llama al servicio con parámetros por defecto para precio
-    this.productService.getByQuery(this.searchQuery, 0, 999999).subscribe({
-      next: (response: ProductList) => {
-        if (Array.isArray(response)) {
-          this.products = response;
-        } else if (response && typeof response === 'object' && Array.isArray(response)) {
-          this.products = response;
-        } else if (response != null && Array.isArray(response)) {
-          this.products = response;
-        } else {
-          this.products = [];
-        }
+    // Si NO hay query o es 'all', traer todos los productos
+    if (!this.searchQuery || this.searchQuery === 'all') {
+      this.productService
+        .get_all()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response: ProductList) => {
+            this.products = Array.isArray(response) ? response : [];
+            this.loading = false;
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            this.handleError('Error al cargar productos', err);
+          },
+        });
+    }
+    // Si HAY query específica, buscar por query
+    else {
+      this.productService
+        .getByQuery(this.searchQuery, 0, 999999)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response: ProductList) => {
+            this.products = Array.isArray(response) ? response : [];
+            this.loading = false;
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            this.handleError('Error al buscar productos', err);
+          },
+        });
+    }
+  }
 
-        this.loading = false;
-        this.changeDetectorRef.detectChanges();
-      },
-      error: (err) => {
-        this.error = 'Error al buscar productos';
-        console.error('Error:', err);
-        this.loading = false;
-        this.changeDetectorRef.detectChanges();
-      },
-    });
+  private handleError(message: string, err: any): void {
+    this.error = message;
+    this.loading = false;
+    console.error('Error:', err);
+    this.cdr.detectChanges();
   }
 }

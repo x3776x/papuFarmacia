@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router'; 
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'home',
@@ -8,4 +8,10 @@ import { RouterModule } from '@angular/router';
   imports: [CommonModule, RouterModule],
   templateUrl: './home.html',
 })
-export class PageHome {}
+export class PageHome {
+  constructor(private router: Router) {}
+
+  showProducts(): void {
+    this.router.navigate(['/productos/buscar', 'all']);
+  }
+}
