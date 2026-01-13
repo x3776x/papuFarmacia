@@ -8,19 +8,19 @@ import { Router } from '@angular/router';
   selector: 'home',
   standalone: true,
   templateUrl: './home.html',
-  imports: [CommonModule]
+  imports: [CommonModule],
 })
 export class AdminPage implements OnInit {
-
   users: InterfaceUser[] = [];
   loading = false;
   error = '';
 
-  private cd = inject(ChangeDetectorRef)
+  private cd = inject(ChangeDetectorRef);
 
   constructor(
     private adminService: ServiceAdmmin,
-    private router: Router
+    private router: Router,
+    private changeDetectorRef: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -37,21 +37,23 @@ export class AdminPage implements OnInit {
       error: () => {
         this.error = 'Could not load users';
         this.loading = false;
-      }
+      },
     });
+    this.loading = false;
+    this.changeDetectorRef.detectChanges();
   }
 
   banUser(user_id: number) {
     this.adminService.patchDataBan(user_id).subscribe({
       next: () => this.loadUsers(),
-      error: () => alert('Failed to ban user')
+      error: () => alert('Failed to ban user'),
     });
   }
 
   unbanUser(user_id: number) {
     this.adminService.patchDataUnban(user_id).subscribe({
       next: () => this.loadUsers(),
-      error: () => alert('Failed to unban user')
+      error: () => alert('Failed to unban user'),
     });
   }
 }
