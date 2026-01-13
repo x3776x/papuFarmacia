@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
+
 @Component({
   selector: 'app-cancel-accept-buttons',
   imports: [],
@@ -9,8 +10,9 @@ export class ComponentCancelAcceptButtons {
   buttonCancelText = 'Cancelar';
   buttonAcceptText = 'Aceptar';
 
-  @Output() cancel: EventEmitter<void> = new EventEmitter<void>();
-  @Output() accept: EventEmitter<void> = new EventEmitter<void>();
+  @Output() cancel = new EventEmitter<void>();
+  @Output() accept = new EventEmitter<void>();
+  
 
   onClickCancel() {
     this.cancel.emit();

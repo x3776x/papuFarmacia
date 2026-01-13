@@ -9,8 +9,14 @@ import { PageHome } from './pages/home/home';
 import { PageRegisterProduct } from './pages/products/register/register-product';
 import { PageDetailsProduct } from './pages/products/details/details-product';
 import { PageSearchForProducts } from './pages/products/search-for/search-for';
+import { SuppliersListComponent } from './pages/suppliers/supplier-list.component';
+import { NewSupplierComponent } from './pages/suppliers/new-supplier/new-supplier.component';
+import { CreateOrderComponent } from './pages/suppliers/new-purchase-order/new-purchase-order.component';
+import { OrdersListComponent } from './pages/orders-list/orders-list';
+import { EditSupplierComponent } from './pages/suppliers/edit-supplier/edit-supplier';
+
 import { ViewMyProfile } from './pages/users/view-my-profile/view-my-profile/view-my-profile';
-import { PageAdminHome } from './pages/admin/home/home/home';
+import { AdminPage } from './pages/admin/home/home';
 import { PageEditProduct } from './pages/products/edit/edit-product';
 
 export const routes: Routes = [
@@ -31,12 +37,6 @@ export const routes: Routes = [
   {
     path: 'usuario/registro',
     component: PageRegistration,
-  },
-  // Admin
-  {
-    path: 'admin/home',
-    // TODO canActivate: [GuardAuth],
-    component: PageAdminHome,
   },
   // Users
   {
@@ -61,6 +61,28 @@ export const routes: Routes = [
   {
     path: 'productos/editar/:productId',
     component: PageEditProduct,
+  },
+  {
+    path: 'suppliers',
+    component: SuppliersListComponent,
+  },
+  {
+    path: 'suppliers/create',
+    component: NewSupplierComponent,
+  },
+  {
+    path: 'orders/create/:licence',
+    component: CreateOrderComponent,
+  },
+  { path: 'orders', component: OrdersListComponent },
+  {
+    path: 'suppliers/edit/:licence',
+    component: EditSupplierComponent,
+    //admin feed
+  },
+  {
+    path: 'admin/home',
+    component: AdminPage,
   },
   { path: '**', component: PageNotFound },
 ];
