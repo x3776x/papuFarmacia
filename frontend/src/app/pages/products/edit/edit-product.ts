@@ -9,6 +9,7 @@ import { catchError, finalize, of, Subject, takeUntil } from 'rxjs';
 import { InterfacePutProduct } from '../../../interfaces/product/put-product';
 import { ComponentInputField, SelectOption } from '../../../shared/inputs/input-field/input-field';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ServiceShowCustomDialog } from '../../../shared/dialogs/service-dialog';
 
 @Component({
   selector: 'app-product-edit',
@@ -38,7 +39,8 @@ export class PageEditProduct implements OnInit, OnDestroy {
     private productService: ServiceProduct,
     private route: ActivatedRoute,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private customDialogService: ServiceShowCustomDialog
   ) {
     // Inicializar FormGroup
     this.productForm = this.createForm();
@@ -184,13 +186,18 @@ export class PageEditProduct implements OnInit, OnDestroy {
   onSave(): void {
     this.productForm.markAllAsTouched();
     if (this.productForm.invalid) {
-      alert('Por favor completa todos los campos requeridos');
+      this.customDialogService.warning(
+        'Formulario inválido',
+        'Por favor completa todos los campos requeridos'
+      );
       return;
     }
 
     if (!this.currentProduct?.id) {
-      // ✅ Usar productId
-      alert('No se puede actualizar el producto');
+      this.customDialogService.error(
+        'No se puede actualizar el producto',
+        'No se conoce el ID del producto'
+      );
       return;
     }
 
@@ -208,13 +215,13 @@ export class PageEditProduct implements OnInit, OnDestroy {
       )
       .subscribe({
         next: () => {
-          alert('Producto actualizado correctamente');
+          this.customDialogService.success('Producto actualizado correctamente');
           this.productForm.markAsPristine(); // ✅ Marcar como limpio
           this.router.navigate(['/productos/detalles', this.currentProduct!.id]);
         },
         error: (err: any) => {
           console.error('Error al actualizar:', err);
-          alert('Error al actualizar el producto');
+          this.customDialogService.error('Error al actualizar el producto');
         },
       });
   }
@@ -261,12 +268,12 @@ export class PageEditProduct implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          alert('Producto eliminado correctamente');
+          this.customDialogService.success('Producto eliminado correctamente');
           this.router.navigate(['/productos/buscar']);
         },
         error: (err) => {
           console.error('Error al eliminar:', err);
-          alert('Error al eliminar el producto');
+          this.customDialogService.error('Error al eliminar el producto');
         },
       });
   }

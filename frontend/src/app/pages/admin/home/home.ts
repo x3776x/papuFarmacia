@@ -3,6 +3,7 @@ import { ServiceAdmmin } from '../../../services/admin/admin';
 import { InterfaceUser } from '../../../interfaces/user/user';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { ServiceShowCustomDialog } from '../../../shared/dialogs/service-dialog';
 
 @Component({
   selector: 'home',
@@ -20,7 +21,8 @@ export class AdminPage implements OnInit {
   constructor(
     private adminService: ServiceAdmmin,
     private router: Router,
-    private changeDetectorRef: ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
+    private customDialogService: ServiceShowCustomDialog
   ) {}
 
   ngOnInit(): void {
@@ -46,14 +48,14 @@ export class AdminPage implements OnInit {
   banUser(user_id: number) {
     this.adminService.patchDataBan(user_id).subscribe({
       next: () => this.loadUsers(),
-      error: () => alert('Failed to ban user'),
+      error: () => this.customDialogService.warning('Error', 'Failed to ban user'),
     });
   }
 
   unbanUser(user_id: number) {
     this.adminService.patchDataUnban(user_id).subscribe({
       next: () => this.loadUsers(),
-      error: () => alert('Failed to unban user'),
+      error: () => this.customDialogService.warning('Error', 'Failed to ban user'),
     });
   }
 }

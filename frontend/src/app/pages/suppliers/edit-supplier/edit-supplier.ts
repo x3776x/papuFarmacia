@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SupplierService } from '../../../services/supplier/supplier';
-
+import { ServiceShowCustomDialog } from '../../../shared/dialogs/service-dialog';
 
 @Component({
   selector: 'app-edit-supplier',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  templateUrl: './edit-supplier.html'
+  templateUrl: './edit-supplier.html',
 })
 export class EditSupplierComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -19,17 +19,19 @@ export class EditSupplierComponent implements OnInit {
 
   licenceFromUrl: string = '';
 
+  constructor(private customDialogService: ServiceShowCustomDialog) {}
+
   // Definimos el formulario con validaciones
   form: FormGroup = this.fb.group({
     name: ['', Validators.required],
     RFC: ['', Validators.required],
     // La licencia la dejaremos deshabilitada visualmente porque es el ID
-    licence_number: [{value: '', disabled: true}, Validators.required], 
+    licence_number: [{ value: '', disabled: true }, Validators.required],
     supplier_type: ['Distributor', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     phone: ['', Validators.required],
     address: [''],
-    contact: ['']
+    contact: [''],
   });
 
   ngOnInit(): void {
@@ -50,9 +52,9 @@ export class EditSupplierComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar proveedor', err);
-        alert('No se pudo cargar el proveedor');
+        this.customDialogService.error('No se pudo cargar el proveedor');
         this.router.navigate(['/suppliers']);
-      }
+      },
     });
   }
 
@@ -66,13 +68,13 @@ export class EditSupplierComponent implements OnInit {
 
     this.supplierService.updateSupplier(this.licenceFromUrl, supplierData).subscribe({
       next: () => {
-        alert('Proveedor actualizado correctamente');
+        this.customDialogService.success('Proveedor actualizado correctamente');
         this.router.navigate(['/suppliers']);
       },
       error: (err) => {
         console.error('Error actualizando', err);
-        alert('Error al actualizar');
-      }
+        this.customDialogService.error('Error al actualizar');
+      },
     });
   }
 }

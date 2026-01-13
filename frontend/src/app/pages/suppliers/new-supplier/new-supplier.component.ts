@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { SupplierService } from '../../../services/supplier/supplier';
-
+import { ServiceShowCustomDialog } from '../../../shared/dialogs/service-dialog';
 
 @Component({
   selector: 'app-new-supplier',
@@ -18,6 +18,8 @@ export class NewSupplierComponent {
   private supplierService = inject(SupplierService);
   private router = inject(Router);
 
+  constructor(private customDialogService: ServiceShowCustomDialog) {}
+
   // Definimos el formulario y sus validaciones
   form: FormGroup = this.fb.group({
     name: ['', [Validators.required]],
@@ -28,31 +30,33 @@ export class NewSupplierComponent {
     email: ['', [Validators.required, Validators.email]],
     licence_number: ['', [Validators.required]],
     licence_expiration: [null, [Validators.required]],
-    supplier_type: ['DISTRIBUIDOR', [Validators.required]] // Valor por defecto
+    supplier_type: ['DISTRIBUIDOR', [Validators.required]], // Valor por defecto
   });
 
   // Función al enviar
   onSubmit() {
     if (this.form.invalid) {
-      alert('Por favor completa todos los campos correctamente');
+      this.customDialogService.warning('Por favor completa todos los campos correctamente');
       return;
-    } 
+    }
 
-    const payload = { ...this.form.value }
-    if(!payload.licence_expiration) {
+    const payload = { ...this.form.value };
+    if (!payload.licence_expiration) {
       payload.licence_expiration = null;
-    } else { payload.licence_expiration = new Date(payload.licence_expiration).toISOString(); }
+    } else {
+      payload.licence_expiration = new Date(payload.licence_expiration).toISOString();
+    }
 
     // Llamamos al servicio
     this.supplierService.createSupplier(this.form.value).subscribe({
       next: () => {
-        alert('Proveedor creado con éxito');
+        this.customDialogService.success('Proveedor creado con éxito');
         this.router.navigate(['/suppliers']); // Regresamos a la lista
       },
       error: (err) => {
         console.error(err);
-        alert('Error al crear el proveedor');
-      }
+        this.customDialogService.error('Error al crear el proveedor');
+      },
     });
   }
 }

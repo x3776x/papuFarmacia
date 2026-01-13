@@ -10,6 +10,7 @@ import { ServiceProduct } from '../../../services/product/product';
 import { PRODUCT_TYPES } from '../../../interfaces/product/PRODUCT_TYPES';
 import { InterfaceProductType } from '../../../interfaces/product/product-type';
 import { InterfacePostProduct } from '../../../interfaces/product/post-product';
+import { ServiceShowCustomDialog } from '../../../shared/dialogs/service-dialog';
 
 @Component({
   selector: 'register-product',
@@ -29,7 +30,8 @@ export class PageRegisterProduct implements OnDestroy {
   constructor(
     private fb: FormBuilder,
     private productService: ServiceProduct,
-    private router: Router
+    private router: Router,
+    private customDialogService: ServiceShowCustomDialog
   ) {
     this.productForm = this.createForm();
 
@@ -80,13 +82,13 @@ export class PageRegisterProduct implements OnDestroy {
     this.productForm.markAllAsTouched();
 
     if (this.productForm.invalid) {
-      alert('Por favor completa todos los campos requeridos correctamente');
+      ('Por favor completa todos los campos requeridos correctamente');
       return;
     }
 
     // Validar nombre químico si es necesario
     if (this.shouldShowChemicalName() && !this.productForm.get('chemicalName')?.value) {
-      alert('El nombre químico es requerido para este tipo de producto');
+      this.customDialogService.warning('El nombre químico es requerido para este tipo de producto');
       return;
     }
 
@@ -103,7 +105,7 @@ export class PageRegisterProduct implements OnDestroy {
       )
       .subscribe({
         next: (response) => {
-          alert('Producto registrado correctamente');
+          this.customDialogService.success('Producto registrado correctamente');
           this.productForm.reset();
           this.productForm.markAsPristine();
 
@@ -118,13 +120,19 @@ export class PageRegisterProduct implements OnDestroy {
           console.error('Error al registrar producto:', err);
 
           if (err.status === 400) {
-            alert('Datos inválidos. Por favor verifica la información ingresada.');
+            this.customDialogService.error(
+              'Datos inválidos. Por favor verifica la información ingresada.'
+            );
           } else if (err.status === 409) {
-            alert('Ya existe un producto con ese nombre comercial.');
+            this.customDialogService.warning('Ya existe un producto con ese nombre comercial.');
           } else if (err.status === 0) {
-            alert('No se pudo conectar con el servidor. Verifica tu conexión.');
+            this.customDialogService.error(
+              'No se pudo conectar con el servidor. Verifica tu conexión.'
+            );
           } else {
-            alert('Error al registrar el producto. Por favor intenta de nuevo.');
+            this.customDialogService.error(
+              'Error al registrar el producto. Por favor intenta de nuevo.'
+            );
           }
         },
       });
